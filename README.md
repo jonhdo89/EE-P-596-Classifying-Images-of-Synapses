@@ -66,12 +66,14 @@ For this notebook you can currently find in the /src folder, the custom CNN is t
 
 3D EM Synapse Classification 
 My contribution implemented the 3D deep learning pipeline for excitatory vs. inhibitory synapse classification using volumetric EM cubes from the MICrONS dataset. The goal was to evaluate whether 3D convolutional backbones can extract synaptic ultrastructure features (vesicles, clefts, membranes) that distinguish inhibitory from excitatory connections.
+
 Model Architectures & Training Framework
 I implemented and evaluated multiple 3D backbones:
 •	UNet3D Encoder–Classifier (custom)
 •	r2plus1d_18, r3d_18, and mc3_18 (from torchvision.models.video)
 •	GroupNorm-based variants to improve convergence on small batch sizes
 •	Optional channels_last_3d memory layout for throughput
+
 The training framework included:
 •	Class-balanced BCE and Focal Loss (γ=2) to mitigate severe label imbalance
 •	3D spatial augmentations (random flips, rotations, elastic noise)
@@ -79,10 +81,12 @@ The training framework included:
 •	EMA (Exponential Moving Average) of model weights
 •	Test-Time Augmentation (TTA) with 8× flip/rotate evaluations
 •	τ-sweeping on the validation set to maximize balanced accuracy
+
 Hyak Environment & Data Limitation
 All models were trained on the UW Hyak HPC cluster.
 Although the pipeline was fully implemented, the MICrONS EM cube directory contained 0 valid TIFF volumes, which prevented true 3D training. With no EM samples available, all 3D backbones collapsed to predicting the majority class, and balanced accuracy remained near chance.
 Fallback Baseline 
 To provide at least one working result for comparison, I added a lightweight connectivity-only logistic model, but this baseline is not the focus of the deep learning work.
+
 Summary
 This component of the project delivers a complete 3D deep learning system, including data loaders, augmentation pipeline, loss functions, training loop, stability techniques, and evaluation logic—ready to run once valid EM volumes are available.
