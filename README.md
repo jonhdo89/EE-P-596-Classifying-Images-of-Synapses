@@ -1,5 +1,5 @@
 # Project Overview
-This project aims to classify brain synapses into excitatory and inhibitory types using 2D electron microscopy (EM) patches and 3D image cubes extracted from the MICrONS dataset. Our best 2D model was the ResNet-50 model @ 76.89% accuracy. Our best 3D model was...
+This project aims to classify brain synapses into excitatory and inhibitory types using 2D electron microscopy (EM) patches and 3D image cubes extracted from the MICrONS dataset. Our best 2D model was the ResNet-50 model @ **76.89%** accuracy. Our best 3D model was the r2plus1d-18 model @ **56.1%**. An extra Connectivity Meta model achieved **94%** (logistic regression, not deep learning) is included at the bottom of the **`3D_synapse__classification.ipynb`** file.
 
 
 # Setup
@@ -14,19 +14,27 @@ cd <your_repo>
 pip install -r requirements.txt
 ```
 
-# Running the Demos
+# Running the Demo
 
-#### 1. Download the 2D model and 2D dataset and place them in the checkpoints and data folder respectively:
-
+#### 1. Download the 2D model and 2D dataset 
+Place them in the checkpoints and data folder respectively:
+- **`checkpoints/`** → pre-trained model  
+- **`data/`** → dataset
+  
 ###### Google Drive Links
 
-2D ResNet-50 Model w/ 76.89% Accuracy:
+**2D ResNet-50 Model (76.89% Accuracy):**
 https://drive.google.com/file/d/1CUZ2VUxfnIqTzDNdOPkU1feiZv1Qau1f/view?usp=sharing
 
-2D 256x256 Dataset:
+**2D Dataset (256×256 Synapse Patches):**
 https://drive.google.com/drive/folders/1YyoQjH1dlb3aOVXdFJ3UI226gsIorvmC?usp=sharing
 
 #### 2. Open and run demo2d.ipynb
+
+#### 3. Note on 3D Demo
+We did not include a demo for 3D due to the complexity and length of time to run. See the testing results in:
+**`3D_synapse__classification.ipynb`**  
+(located in the `/src` folder)
 
 # Expected Output
 
@@ -36,7 +44,7 @@ After you run demo2d.ipynb, you should see the testing accuracy listed, the exam
 
 ###### Google Drive Links
 
-2D ResNet-50 Model w/ 76.89% Accuracy:
+**2D ResNet-50 Model w/ 76.89% Accuracy:**
 https://drive.google.com/file/d/1CUZ2VUxfnIqTzDNdOPkU1feiZv1Qau1f/view?usp=sharing
 
 # Acknowledgements:
@@ -62,31 +70,47 @@ This notebook trains a custom CNN model (either on 128x128 or 256x256 data) and 
 
 For this notebook you can currently find in the /src folder, the custom CNN is trained on 256×256 EM patches, we used a batch size of 32 and trained the model for 30 epochs. The learning rate was set to 0.00025, and optimization was performed using the Adam optimizer. As with the ResNet experiments, we used cross-entropy loss for the binary excitatory vs. inhibitory classification task. No learning-rate scheduler was used for this architecture, allowing the model to train with a fixed learning rate throughout all epochs. All reproducibility controls, including setting the random seed, were kept consistent like the ResNet notebook.
 
-# 3-D Notebooks
+### 3-D Notebook in src
 
-3D EM Synapse Classification 
+#### 3D_synapse__classification.ipynb
+
 My contribution implemented the 3D deep learning pipeline for excitatory vs. inhibitory synapse classification using volumetric EM cubes from the MICrONS dataset. The goal was to evaluate whether 3D convolutional backbones can extract synaptic ultrastructure features (vesicles, clefts, membranes) that distinguish inhibitory from excitatory connections.
 
-Model Architectures & Training Framework
-I implemented and evaluated multiple 3D backbones:
-•	UNet3D Encoder–Classifier (custom)
-•	r2plus1d_18, r3d_18, and mc3_18 (from torchvision.models.video)
-•	GroupNorm-based variants to improve convergence on small batch sizes
-•	Optional channels_last_3d memory layout for throughput
+#### Model Architectures & Training Framework
+
+I implemented and evaluated several 3D architectures:
+
+- **UNet3D Encoder → Classifier** (custom)
+- **r2plus1d_18**, **r3d_18**, **mc3_18** (from `torchvision.models.video`)
+- **GroupNorm-augmented variants** to improve small-batch stability
+- **Optional `channels_last_3d` memory layout** for higher GPU throughput
 
 The training framework included:
-•	Class-balanced BCE and Focal Loss (γ=2) to mitigate severe label imbalance
-•	3D spatial augmentations (random flips, rotations, elastic noise)
-•	MixUp-3D and CutMix-3D with soft labels for regularization
-•	EMA (Exponential Moving Average) of model weights
-•	Test-Time Augmentation (TTA) with 8× flip/rotate evaluations
-•	τ-sweeping on the validation set to maximize balanced accuracy
 
-Hyak Environment & Data Limitation
-All models were trained on the UW Hyak HPC cluster.
-Although the pipeline was fully implemented, the MICrONS EM cube directory contained 0 valid TIFF volumes, which prevented true 3D training. With no EM samples available, all 3D backbones collapsed to predicting the majority class, and balanced accuracy remained near chance.
-Fallback Baseline 
-To provide at least one working result for comparison, I added a lightweight connectivity-only logistic model, but this baseline is not the focus of the deep learning work.
+- **Class-balanced BCE** and **Focal Loss (γ = 2)** for label imbalance
+- **3D spatial augmentations**: random flips, rotations, elastic noise
+- **MixUp-3D** and **CutMix-3D** with soft labels for regularization
+- **EMA (Exponential Moving Average)** of model weights
+- **Test-Time Augmentation (TTA)** using 8× flip/rotate samples
+- **τ-sweeping** on the validation set to maximize balanced accuracy
 
-Summary
-This component of the project delivers a complete 3D deep learning system, including data loaders, augmentation pipeline, loss functions, training loop, stability techniques, and evaluation logic—ready to run once valid EM volumes are available.
+---
+
+#### **Hyak Environment & Data Limitation**
+
+All experiments were executed on the **UW Hyak HPC cluster**.
+
+Despite implementing the full 3D pipeline, the MICrONS EM cube directory contained **0 valid TIFF volumes**, which prevented actual 3D training. Because no real cubes were available, all 3D backbones collapsed to majority-class predictions, yielding balanced accuracies close to chance.
+
+---
+
+#### **Fallback Baseline**
+
+To provide at least one functional comparison point, I added a **connectivity-only logistic regression baseline**, though this was not the focus of the deep learning work.
+
+---
+
+#### **Summary**
+
+This component of the project delivers a fully functional **3D deep learning system** including dataloaders, augmentation pipeline, loss functions, training loop, training stability tools, and evaluation logic.  
+The system is ready to run as soon as valid EM cube volumes are provided.
