@@ -1,4 +1,5 @@
 # Project Overview
+#### Project by: Jonathan Do & Bita Massoudi
 This project aims to classify brain synapses into excitatory and inhibitory types using 2D electron microscopy (EM) patches and 3D image cubes extracted from the MICrONS dataset. Our best 2D model was the ResNet-50 model @ **76.89%** accuracy. Our best 3D model was the r2plus1d-18 model @ **56.1%**. An extra Connectivity Meta model achieved **94%** (logistic regression, not deep learning) is included at the bottom of the **`3D_synapse__classification.ipynb`** file.
 
 
